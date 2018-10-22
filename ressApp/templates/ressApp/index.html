@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+
+<!-- authors: Julian Sears, Simon Hoffmann-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'ressApp/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'ressApp/css/leaflet.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'ressApp/css/style.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'ressApp/css/datepicker.css' %}"/>
+    <script src="{% static 'ressApp/js/leaflet.js' %}"></script>
+    <script src="{% static 'ressApp/js/bootstrap.js' %}"></script>
+    <script src="{% static 'ressApp/js/jquery.min.js' %}"></script>
+    <script src="{% static 'ressApp/js/popper.min.js' %}"></script>
+    <script src="{% static 'ressApp/js/moment.min.js' %}"></script>
+    <script src="{% static 'ressApp/js/bootstrap-datepicker.js' %}"></script>
+    <title>Bamberger Ressourcenpool</title>
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand " href="/ressApp/">
+        <img class="d-md-none" src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="199" height="39" alt="">
+        <img class="d-none d-md-block" src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="298" height="58" alt="">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item">
+                {% if cart_size %}
+                    <a class="nav-link" href="/ressApp/cart">Merkliste <span class="badge badge-pill badge-danger">{{ cart_size }}</span></a>
+                {% else %}
+                    <a class="nav-link pr-4" href="/ressApp/cart">Merkliste</a>
+                {% endif %}
+            </li>
+            <li class="nav-item">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="/ressApp/account" style="padding-left:0px">Profil</a>
+                {% else %}
+                    <a class="nav-link" href="/ressApp/signup" style="padding-left:0px">Registrieren</a>
+                {% endif %}
+            </li>
+            <li class="nav-item">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="/ressApp/accounts/logout/">Abmelden</a>
+                {% else %}
+                    <a class="nav-link" href="/ressApp/accounts/login/">Anmelden</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Header -->
+<div class="container-fluid" id="headerPicture">
+    <img src="{% static 'ressApp/images/bamberg-bruecke.jpg' %}" class="img-fluid" alt="Responsive image"
+         style="filter: brightness(50%); min-height:250px; object-fit:cover;">
+    <div class="centered">
+        <h1 class="display-6 d-md-none">Ressourcenpool für Eventbedarf, Know-how, …</h1>
+        <h1 class="display-4 d-none d-md-block">Ressourcenpool für Eventbedarf, Know-how, …</h1>
+    </div>
+</div>
+
+<!-- Suchformular -->
+<form action="{% url 'index' %}" method="GET">
+    <input id="mainSearch" name="q" type="text" class="form-control"
+           value="{{ request.GET.q }}" placeholder="Ressourcenpool durchsuchen nach..."
+           aria-label="Ressourcenpool durchsuchen" aria-describedby="basic-addon2">
+</form>
+<div class="container-fluid">
+    <div class="row justify-content-center" style="background-color: #F4F4F4; padding-bottom: 0px">
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm btn-filter" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Kategorie
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <form>
+                    {% for category in categories  %}
+                        <input type="submit" class="dropdown-item" name="category" value="{{ category }}"/>
+                    {%  endfor %}
+                </form>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-light btn-sm btn-filter" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Angebotsart
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <form>
+                    <input type="submit" class="dropdown-item" name="typ" value="Verleihen" />
+                    <input type="submit" class="dropdown-item" name="typ" value="Verschenken" />
+                </form>
+            </div>
+        </div>
+    <div class="dropdown">
+            <button class="btn btn-light btn-sm btn-filter" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Verfügbarkeit
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <form>
+                    <div class="input-daterange-from p-2">
+                        <input type="text" class="form-control mb-2" name="datum_von" placeholder="Von" readonly>
+                    </div>
+                    <div class="input-daterange-to p-2">
+                        <input type="text" class="form-control" name="datum_bis" placeholder="Bis" readonly>
+                    </div>
+                    <div class="text-center">
+                        <input type="submit" class="btn btn-primary btn-sm pt-0" name="datum" value="Anwenden" />
+                    </div>
+                </form>
+                <script>
+                    var $j = jQuery.noConflict();
+
+                    $j('.input-daterange-from input').datepicker({
+                        format: 'dd-mm-yyyy',
+                        startDate: '-3d',
+                    });
+
+                    $j('.input-daterange-from input').on("change", function(e){
+                        var date = $j('.input-daterange-from input').datepicker('getDate');
+                        $j('.input-daterange-to input').datepicker('setStartDate', date);
+                    });
+
+                    $j('.input-daterange-to input').on("change", function(e){
+                        var date = $j('.input-daterange-to input').datepicker('getDate');
+                        $j('.input-daterange-from input').datepicker('setEndDate', date);
+                    });
+
+                    $j('.input-daterange-to input').datepicker({
+                        format: 'dd-mm-yyyy',
+                        startDate: '-3d'
+                    });
+
+                    $j('.input-daterange-from input').each(function() {
+                        $j(this).datepicker('clearDates');
+                    });
+
+                    $j('.input-daterange-to input').each(function() {
+                        $j(this).datepicker('clearDates');
+                    });
+                </script>
+            </div>
+        </div>
+
+        <form>
+            <input type="submit" class="btn btn-light btn-sm btn-filter" name="sorting" value="Alphabetisch" />
+            <input type="submit" class="btn btn-light btn-sm btn-filter" name="sorting" value="Preis aufsteigend" />
+            <input type="submit" class="btn btn-light btn-sm btn-filter" name="sorting" value="Preis absteigend" />
+            <input type="submit" class="btn btn-light btn-sm btn-filter" name="sorting" value="Aktuellste Angebote" />
+        </form>
+        <form>
+            <input type="submit" class="btn btn-warning btn-sm btn-filter" name="deletefilter" value="Filter entfernen" />
+        </form>
+    </div>
+</div>
+
+<!-- Suchergebnisse -->
+
+<div class="content" style="padding-top: 20px">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <!-- Auswahl an Angeboten -->
+                {% if offer_list %}
+                    <div class="row justify-content-center">
+                        {% for offer in offer_list %}
+                            <div class="px-2 col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                <div class="card" onmouseover="mouseoverOpenMarker({{ offer.id }})">
+                                    <a class="img-card" href="/ressApp/{{ offer.pk }}/" alt="Card image cap">
+                                        <img src="{{ offer.image.url }}"/>
+                                    </a>
+                                    <br/>
+                                    <div class="card-content">
+                                        <h4 class="card-title"><a
+                                                href="/ressApp/{{ offer.pk }}/">{{ offer.title|truncatechars:28 }}</a>
+                                        </h4>
+                                        <p class="card-text">
+                                            {{ offer.subtitle|truncatechars:40 }}
+                                        </p>
+
+                                        <p class="card-lend_or_gift">
+                                            {% if offer.lend_or_gift == 'VL' %}
+                                                <br>{{ offer.price }}€
+                                            {% else %}
+                                                <br><img style="width:10px" src="{% static 'ressApp/images/present_icon.png' %}"/>
+                                            {% endif %}
+                                        </p>
+
+                                        <hr id="card-hr">
+                                        <p class="card-text-owner">{{ offer.owner }}</p>
+
+                                        {% if offer in cart %}
+                                            <form action="/ressApp/{{ offer.id }}/remove_from_cart/" method="post" role="form">
+                                                {% csrf_token %}
+                                                <button class="btn" type="submit" value="remove_from_cart" id="card-bookmark" style="opacity: 1;">
+                                                    <img src="{% static 'ressApp/images/bookmark_icon.png' %}"/>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <form action="/ressApp/{{ offer.id }}/add_to_cart/" method="post" role="form">
+                                                {% csrf_token %}
+                                                <button class="btn" type="submit" value="add_to_cart" id="card-bookmark">
+                                                    <img src="{% static 'ressApp/images/bookmark_icon.png' %}"/>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Leider gibt es zu dieser Suchanfrage kein Ergebnis. Versuchen Sie die Filter zu entfernen oder geben Sie einen anderen Suchbegriff ein.</p>
+                {% endif %}
+
+            </div>
+            <div class="col-4 col-xl-4 pl-2 d-none d-md-block">
+
+                <div class="sticky-top">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var ressicon = L.icon({
+            iconUrl: "{% static 'ressApp/images/marker-icon.png' %}",
+            iconSize: [28, 36], // size of the icon
+            iconAnchor: [17, 26], // point of the icon which will correspond to marker's location
+            popupAnchor: [-2, -24] // point from which the popup should open relative to the iconAnchor
+        });
+
+        var mymap = L.map('map').setView([49.8988, 10.9027], 13);
+
+        L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(mymap);
+
+
+        var data = [];
+
+        {% for offer in offer_list %}
+            data.push({
+                title: '{{ offer.title }}',
+                subtitle: '{{ offer.subtitle }}',
+                latLng: [{{offer.offerAdress.latitude}}, {{offer.offerAdress.longitude}}],
+                url: "/ressApp/{{ offer.pk }}/",
+                id: '{{ offer.id }}',
+            });
+        {% endfor %}
+
+        // Add an object to save markers
+        var markers = {};
+
+        // Loop through the data
+        for (var i = 0; i < data.length; i++) {
+            var offerMarker = data[i];
+
+            // Create and save a reference to each marker
+            markers[offerMarker.id] = L.marker(offerMarker.latLng, {icon: ressicon})
+                .addTo(mymap)
+                .bindPopup("<a style=\"color:black;\" href=" + offerMarker.url.toString() + ">" +"<strong>" + offerMarker.title.toString() + "</strong>" + "<br>" + offerMarker.subtitle.toString() +  "</a>")
+                .on('mouseover', function (e) {this.openPopup();});
+        }
+        mymap.setView([49.8988, 10.9027], 12);
+
+
+        function mouseoverOpenMarker(offerId){
+            markers[offerId].openPopup();
+        }
+
+    </script>
+</div>
+
+<footer class="page-footer p-2 bg-dark">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="footerNavbar">
+        <ul class="nav navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">AGB </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">Impressum</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">Über uns</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">FAQ</a>
+            </li>
+        </ul>
+
+        <a class="navbar-brand" href="#">
+            <img src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="149" height="29" alt="">
+        </a>
+    </nav>
+
+
+</footer>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="{% static 'ressApp/js/bootstrap.min.js' %}"></script>
+
+
+</body>
+</html>

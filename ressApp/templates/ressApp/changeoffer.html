@@ -1,0 +1,52 @@
+{% extends 'ressApp/base.html' %}
+
+<!-- authors: Simon Hoffmann, Julian Sears-->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Angebot ändern</title>
+{% endblock %}
+
+{% block content %}
+        <div class="row">
+            <div class="col">
+                <h1>Hier kannst du dein eingestelltes Angebot ändern.</h1>
+                    <form method="post"  enctype="multipart/form-data" role="form">
+                    {% csrf_token %}
+                    {% if offerForm.errors %}
+                        <div class="alert alert-danger" role="alert">{{ offerForm.errors }}</div>
+                        {% endif %}
+                        {% if addressForm.errors %}
+                            <div class="alert alert-danger" role="alert">{{ addressForm.errors }}</div>
+                        {% endif %}
+                        {% for field in offerForm %}
+                                    <p>
+                                        {{ field.label_tag }}<br>
+                                        {{ field }}
+                                        {% if field.help_text %}
+                                            <small style="color: grey">{{ field.help_text }}</small>
+                                        {% endif %}
+                                        {% for error in offerForm.errors %}
+                                            <p style="color: red">{{ error }}</p>
+                                        {% endfor %}
+                                    </p>
+                        {% endfor %}
+
+                        {% for field in addressForm %}
+                                    <p>
+                                    {{ field.label_tag }}<br>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <small style="color: grey">{{ field.help_text }}</small>
+                                {% endif %}
+                            </p>
+                        {% endfor %}
+                    <button class="btn btn-primary" type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+        <br>
+    <form>
+        <input type="submit" class="btn btn-danger btn-sm" name="delteOffer" value="Angebot löschen" />
+    </form>
+{% endblock %}
+

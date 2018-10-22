@@ -1,0 +1,200 @@
+{% extends 'ressApp/base.html' %}
+{% load static %}
+
+<!-- authors: Julian Sears, Simon Hoffmann-->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - {{ offer.title }}</title>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Details zum Angebot mit Bild -->
+    <div class="content">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-md-12">
+                    <img class="card-img" src="{{ offer.image.url }}" alt="Card image cap">
+
+                    {% if user.is_authenticated %}
+                        {% if user == offer.owner %}
+
+                            <ul class="list-group mt-3">
+                                <li class="list-group-item">
+                                    <form action="/ressApp/{{ offer.id }}/change/" method="get" role="form">
+                                        <button class="btn btn-primary btn-sm" type="submit" value="change">Angebot ändern</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        {% endif %}
+                    {% endif %}
+
+
+                    <ul class="list-group mt-3">
+                        <li class="list-group-item">
+                            <div class="d-md-flex w-100 justify-content-between">
+                                <div>
+                                    <h1 class="mb-1">{{offer.title}}</h1>
+                                    <h2>{{ offer.subtitle}}</h2>
+                                </div>
+                                {% if offer in cart %}
+                                    <form class="d-inline" action="/ressApp/{{ offer.id }}/remove_from_cart/" method="post" role="form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-primary btn-sm" type="submit" value="remove_from_cart">Vom Merkzettel entfernen</button>
+                                    </form>
+                                {% else %}
+                                    <form class="d-inline" action="/ressApp/{{ offer.id }}/add_to_cart/" method="post" role="form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-primary btn-sm" type="submit" value="add_to_cart">Zum Merkzettel hinzufügen</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+
+                        </li>
+
+                        {% if offer.lend_or_gift == 'VL'  %}
+                            <li class="list-group-item">
+                                <div class="d-md-flex w-100 justify-content-between">
+                                    <div>
+                                        <h5>Zu verleihen</h5>
+                                    </div>
+                                    <h5>Preis/Tag: {{ offer.price }} €</h5>
+                                    <h5>Kaution: {{ offer.deposit }} €</h5>
+                                </div>
+                            </li>
+                        {% else %}
+                            <li class="list-group-item">
+                                <div class="d-md-flex w-100 justify-content-between">
+                                    <div>
+                                        <h5>Zu verschenken</h5>
+                                    </div>
+                                    <h5>Preis/Tag: 0 €</h5>
+                                    <h5>Kaution: 0 €</h5>
+                                </div>
+                            </li>
+                        {% endif %}
+
+                        <li class="list-group-item">
+                            <p>{{ offer.description }}</p>
+                        </li>
+
+                        <li class="list-group-item">
+                            <p>An folgenden Tagen verfügbar:</p>
+                            <table class="table table-bordered text-center">
+                                <thead>
+                                <tr>
+                                    <th class="{% if '0' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Mo</th>
+                                    <th class="{% if '1' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Di</th>
+                                    <th class="{% if '2' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Mi</th>
+                                    <th class="{% if '3' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Do</th>
+                                    <th class="{% if '4' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Fr</th>
+                                    <th class="{% if '5' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">Sa</th>
+                                    <th class="{% if '6' in offer.BlockedDays %} bg-danger {% else %} bg-success {% endif %}" scope="col">So</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </li>
+
+                        <li class="list-group-item">
+                            <div class="d-md-flex w-100 justify-content-between">
+                                <p>
+                                    Abholadresse:<br>
+                                    {{ offer.offerAdress.street}} {{ offer.offerAdress.house_number}}<br>
+                                    {{ offer.offerAdress.postcode}} {{ offer.offerAdress.city}}
+                                </p>
+                                Anbieter: {{ offer.owner }} <br>
+                                E-Mail: {{ offer.owner.email}}<br>
+                                Telefon: {{ offer.owner.profile.phone}}<br>
+                                <form class="d-inline" method="get" action="/ressApp/providerpage/">
+                                    <button class="btn btn-primary btn-sm" name="profile_id" type="submit" value="{{ offer.owner.id  }}">Zur Seite des Anbieters</button>
+                                </form>
+                            </div>
+
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-4 col-xl-4 pl-2 d-none d-lg-block">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid mt-5 text-center">
+            <h2> Ähnliche Angebote</h2>
+            <div class="row">
+                <div class="col px-4 col-xs-24 col-sm-12 col-md-12 col-lg-12">
+                    <!-- Auswahl an Angeboten -->
+                    {% if offers %}
+                        <div class="row justify-content-center">
+                            {% for offer in offers %}
+                                <div class="px-2 col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                    <div class="card">
+                                        <a class="img-card" href="/ressApp/{{ offer.pk }}/" alt="Card image cap">
+                                            <img src="{{ offer.image.url }}"/>
+                                        </a>
+                                        <br/>
+                                        <div class="card-content">
+                                            <h4 class="card-title"><a
+                                                    href="/ressApp/{{ offer.pk }}/">{{ offer.title|truncatechars:30 }}</a>
+                                            </h4>
+                                            <p class="card-text">
+                                                {{ offer.subtitle|truncatechars:60 }}
+                                            </p>
+
+                                            <p class="card-lend_or_gift">
+                                                {% if offer.lend_or_gift == 'VL' %}
+                                                    <br>{{ offer.price }}€
+                                                {% else %}
+                                                    <br><img style="width:10px" src="{% static 'ressApp/images/present_icon.png' %}"/>
+                                                {% endif %}
+                                            </p>
+
+                                            <hr id="card-hr">
+                                            <p class="card-text-owner">{{ offer.owner }}</p>
+                                            <form action="/ressApp/{{ offer.id }}/add_to_cart/" method="post" role="form">
+                                                {% csrf_token %}
+                                                <button class="btn" type="submit" value="add_to_cart" id="card-bookmark" {% if offer in cart %}style="opacity: 1;"{% endif %}>
+                                                    <img src="{% static 'ressApp/images/bookmark_icon.png' %}"/>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p>Kein passendes Angebot gefunden.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            var ressicon = L.icon({
+                iconUrl: "{% static 'ressApp/images/marker-icon.png' %}",
+                iconSize: [28, 36], // size of the icon
+                iconAnchor: [17, 26], // point of the icon which will correspond to marker's location
+                popupAnchor: [-2, -24] // point from which the popup should open relative to the iconAnchor
+            });
+
+            var mymap = L.map('map').setView([{{offer.offerAdress.longitude}}, {{offer.offerAdress.latitude}}], 15);
+
+            L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(mymap);
+
+            L.marker([{{offer.offerAdress.latitude}}, {{offer.offerAdress.longitude}}], {icon: ressicon})
+                .addTo(mymap)
+                .bindPopup("<b>{{ offer.title }}</b><br />{{ offer.offerAdress.street}} {{ offer.offerAdress.house_number}}<br>{{ offer.offerAdress.postcode}} {{ offer.offerAdress.city}}").openPopup();
+
+            // Calculate the offset
+            var offset = mymap.getSize().x*0.4;
+            // Then move the map
+            mymap.panBy(new L.Point(-offset, -100), {animate: false});
+
+
+        </script>
+
+    </div>
+{% endblock %}

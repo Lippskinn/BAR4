@@ -1,0 +1,123 @@
+{% extends 'ressApp/base.html' %}
+{% load static %}
+
+<!-- authors: Julian Sears, David Hartmann, Simon Hoffmann -->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Profil von {{ user.profile.user }}</title>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Suchergebnisse -->
+    <div class="container-fluid">
+        <div class="row d-md-none mb-4 ml-1 mr-1">
+            <ul class="list-group" style="width:100%">
+                <li class="list-group-item">
+                    <h3>{{ user.profile.user }}</h3>
+                    <h4>{{ user.profile.einrichtungsname }}</h4>
+                </li>
+                <li class="list-group-item">
+                    <img class="card-img" src="{{ user.profile.image.url }}">
+                </li>
+                <li class="list-group-item">Adresse:<br>
+                    {{ user.profile.address.street}} {{ user.profile.address.house_number}}<br>
+                    {{ user.profile.address.city}}<br>
+                    {{ user.profile.address.postcode}}
+                </li>
+                <li class="list-group-item">Kontakt:<br>
+                    {{ user.profile.user.email}}<br>
+                    {{ user.profile.phone}}<br>
+                </li>
+                {% if user.is_authenticated %}
+                    {% if user == userprofile %}
+                        <li class="list-group-item">
+                            <a href="/ressApp/newoffer">Neues Angebot einstellen</a>
+                            <a href="/ressApp/changeaccount">Profil editieren</a>
+                            <a href="/ressApp/password/">Passwort ändern</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-3 col-xl-3 d-none d-md-block">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h3>{{ user.profile.user }}</h3>
+                        <h4>{{ user.profile.einrichtungsname }}</h4>
+                    </li>
+                    <li class="list-group-item">
+                        <img class="card-img" src="{{ user.profile.image.url }}">
+                    </li>
+                    <li class="list-group-item">Adresse:<br>
+                        {{ user.profile.address.street}} {{ user.profile.address.house_number}}<br>
+                        {{ user.profile.address.city}}<br>
+                        {{ user.profile.address.postcode}}
+                    </li>
+                    <li class="list-group-item">Kontakt:<br>
+                        {{ user.profile.user.email}}<br>
+                        {{ user.profile.phone}}<br>
+                    </li>
+
+
+                    {% if user.is_authenticated %}
+                        <li class="list-group-item">
+                            <a href="/ressApp/newoffer">
+                                <button class="btn btn-primary btn-sm mt-2">Neues Angebot einstellen</button>
+                            </a>
+                            <a href="/ressApp/changeaccount">
+                                <button class="btn btn-primary btn-sm mt-2">Profil editieren</button>
+                            </a>
+                            <a href="/ressApp/password/">
+                                <button class="btn btn-primary btn-sm mt-2">Passwort ändern</button>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+            <div class="col">
+                <!-- Auswahl an Angeboten -->
+                {% if user.offer_set.all %}
+                    <div class="row justify-content-center">
+                        {% for offer in user.offer_set.all %}
+                            <div class="px-2 col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                <div class="card">
+                                    <a class="img-card" href="/ressApp/{{ offer.pk }}/" alt="Card image cap">
+                                        <img src="{{ offer.image.url }}"/>
+                                    </a>
+                                    <br/>
+                                    <div class="card-content">
+                                        <h4 class="card-title"><a
+                                                href="/ressApp/{{ offer.pk }}/">{{ offer.title|truncatechars:28 }}</a>
+                                        </h4>
+                                        <p class="card-text">
+                                            {{ offer.description|truncatechars:40 }}
+                                        </p>
+                                        <p class="card-lend_or_gift">
+                                            {% if offer.lend_or_gift == 'VL' %}
+                                                <br>{{ offer.price }}€
+                                            {% else %}
+                                                <br><img style="width:10px" src="{% static 'ressApp/images/present_icon.png' %}"/>
+                                            {% endif %}
+                                        </p>
+                                        <hr id="card-hr">
+                                        <p class="card-text-owner">{{ offer.owner }}</p>
+                                        <a class="card-edit" href="/ressApp/{{ offer.id }}/change/">Bearbeiten</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                {% else %}
+                    <p>Sie haben keine Angebote eingestellt.</p>
+                    <a href="/ressApp/newoffer">
+                        <button class="btn btn-primary btn-sm mt-2">Neues Angebot einstellen</button>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

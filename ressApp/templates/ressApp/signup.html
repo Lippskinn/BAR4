@@ -1,0 +1,29 @@
+{% extends 'ressApp/base.html' %}
+
+<!-- authors: David Hartmann, Katrin Reder-Zirkelbach, Julian Sears -->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Registrieren</title>
+{% endblock %}
+
+{% block content %}
+    <h2>Registrieren</h2>
+    <form method="post"  enctype="multipart/form-data">
+        {% if form.postcode.errors %}
+            <div class="alert alert-danger" role="alert">{{ "Geben sie eine korrekte, fünfstellige PLZ ein!" }}</div>
+        {% endif %}
+        {% if form.phone.errors %}
+            <div class="alert alert-danger" role="alert">{{ "Geben sie eine korrekte Telefonnummer ein (nur Zahlen, 8-15 Stellen)" }}</div>
+        {%  endif %}
+        {% for field in form %}
+            <p>
+                {% csrf_token %}
+                {{ field.label_tag }}<br>
+                {{ field }}
+                {% if field.help_text %}
+                {% endif %}
+            </p>
+        {% endfor %}
+        <button class="btn btn-primary" type="submit">Registrieren</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'ressApp/base.html' %}
+{%  load static %}
+
+<!-- authors: Julian Sears, David Hartmann -->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Merkliste</title>
+{% endblock %}
+
+<!-- Liste von Produkten, die im Warenkorb liegen inklusive Funktion zum löschen-->
+{% block content %}
+    <div class="row">
+        <div class="col">
+
+            <h1>Übersicht aller Angebote auf der Merkliste</h1>
+
+            <form method="get" action="/ressApp/">
+                <button class="btn btn-primary btn-sm d-print-none  mb-2" href="/ressApp/">Zurück zu den Ergebnissen</button>
+            </form>
+
+            {% if cart_contents %}
+                {% for offer in cart_contents|dictsort:"title" %}
+                    <ul class="list-group mb-2">
+                        <a href="/ressApp/{{ offer.pk }}/" class="list-group-item list-group-item-action flex-column align-items-start">
+                            <div class="d-flex flex-wrap w-100 justify-content-between">
+                                <div class="pt-2">
+                                    <img class="card-img" style="width:150px" src="{{ offer.image.url }}" alt="Card image cap">
+                                </div>
+                                <div class="mr-auto p-2 align-self-stretch">
+                                    <h5 class="mb-1">{{ offer.title }}</h5>
+                                    <h6>{{ offer.subtitle}}</h6>
+
+                                    {% if offer.lend_or_gift == 'VL'  %}
+                                        <div class="d-md-flex w-100 justify-content-between">
+                                            <p class="mr-2"><strong>Zu verleihen</strong></p>
+                                            <p class="mr-2">Preis/Tag: {{ offer.price }} €</p>
+                                            <p>Kaution: {{ offer.deposit }} €</p>
+                                        </div>
+                                        </li>
+                                    {% else %}
+                                        <div class="d-md-flex w-100 justify-content-between">
+                                            <p>Zu verschenken</p>
+                                        </div>
+                                    {% endif %}
+
+                                    <table class="table table-bordered text-center" style="width:200px; font-size: 0.7em;">
+                                        <thead>
+                                        <tr>
+                                            <th class="{% if '0' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Mo</th>
+                                            <th class="{% if '1' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Di</th>
+                                            <th class="{% if '2' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Mi</th>
+                                            <th class="{% if '3' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Do</th>
+                                            <th class="{% if '4' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Fr</th>
+                                            <th class="{% if '5' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">Sa</th>
+                                            <th class="{% if '6' in offer.BlockedDays %} table-danger d-print-none{% else %} table-success {% endif %} p-1" scope="col">So</th>
+                                        </tr>
+                                        </thead>
+                                    </table>
+
+                                    <p>
+                                        <strong>Abholadresse: </strong>
+                                        {{ offer.offerAdress.street}} {{ offer.offerAdress.house_number}},
+                                        {{ offer.offerAdress.postcode}} {{ offer.offerAdress.city}}
+                                    </p>
+
+                                    <form class="d-inline" action="/ressApp/{{ offer.id }}/remove_from_cart/" method="post" role="form">
+                                        {% csrf_token %}
+                                        <button class="btn btn-primary btn-sm d-print-none mb-1" type="submit" value="remove_from_cart">Vom Merkzettel entfernen</button>
+                                    </form>
+                                    <button class="btn btn-primary btn-sm d-print-none mb-1" href="/ressApp/{{ offer.pk }}/">Details ansehen</button>
+                                </div>
+
+                                <div class="p-2">
+                                    <address class="mb-1"><strong>{{ offer.owner.profile.user}} <br> {{ user.profile.einrichtungsname}}</strong><br>
+                                        {{ offer.owner.profile.address.street}} {{ user.profile.address.house_number}}<br>
+                                        {{ offer.owner.profile.address.postcode}} {{ offer.owner.profile.address.city}}<br>
+                                        {{ offer.owner.email}}<br>{{ offer.owner.profile.phone}}</address>
+                                    <form method="get" action="/ressApp/providerpage/">
+                                        <button class="btn btn-primary btn-sm pt-0 mt-0 d-print-none" name="profile_id" type="submit" value="{{ offer.owner.id  }}">Zur Seite des Anbieters</button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </a>
+                    </ul>
+                {% endfor %}
+            {% else %}
+                <p>Noch keine Angebote auf der Merkliste.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% if cart_contents %}
+        <a href="javascript:window.print()"> <button class="btn btn-primary btn-sm d-print-none">Gesamte Merkliste ausdrucken</button></a>
+    {% endif %}
+
+{% endblock %}

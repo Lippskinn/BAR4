@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<!-- authors: Julian Sears-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'ressApp/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'ressApp/css/leaflet.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'ressApp/css/style.css' %}"/>
+    <script src="{% static 'ressApp/js/leaflet.js' %}"></script>
+
+    {% block title %}{% endblock %}
+
+</head>
+<body>
+
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="/ressApp/">
+        <img class="d-md-none" src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="199" height="39" alt="">
+        <img class="d-none d-md-block" src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="298" height="58" alt="">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="form-inline ml-auto" action="{% url 'index' %}" method="GET">
+            <input id="navbarSearch" style="text-align: center; width: 100%" name="q" type="text" value="{{ request.GET.q }}" class="form-control form-control-sm" placeholder="Durchsuchen..." aria-label="Ressourcenpool durchsuchen..." aria-describedby="basic-addon2">
+        </form>
+        <ul class="nav navbar-nav ml-auto">
+            <li class="nav-item">
+                {% if cart_size %}
+                    <a class="nav-link" href="/ressApp/cart">Merkliste <span class="badge badge-pill badge-danger">{{ cart_size }}</span></a>
+                {% else %}
+                    <a class="nav-link pr-4" href="/ressApp/cart">Merkliste</a>
+                {% endif %}
+            </li>
+            <li class="nav-item">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="/ressApp/account" style="padding-left:0px">Profil</a>
+                {% else %}
+                    <a class="nav-link" href="/ressApp/signup" style="padding-left:0px">Registrieren</a>
+                {% endif %}
+            </li>
+            <li class="nav-item">
+                {% if user.is_authenticated %}
+                    <a class="nav-link" href="/ressApp/accounts/logout/">Abmelden</a>
+                {% else %}
+                    <a class="nav-link" href="/ressApp/accounts/login/">Anmelden</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- Content -->
+<div class="content">
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="page-footer p-2 bg-dark">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="footerNavbar">
+        <ul class="nav navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">AGB </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">Impressum</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">Über uns</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/ressApp/#">FAQ</a>
+            </li>
+        </ul>
+
+        <a class="navbar-brand" href="#">
+            <img src="{% static 'ressApp/images/ressourcenpool_logo.png' %}" width="149" height="29" alt="">
+        </a>
+    </nav>
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="{% static 'ressApp/js/bootstrap.min.js' %}"></script>
+
+</body>
+</html>

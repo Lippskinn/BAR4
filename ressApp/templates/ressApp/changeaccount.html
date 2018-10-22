@@ -1,0 +1,62 @@
+{% extends 'ressApp/base.html' %}
+
+<!-- authors: David Hartmann, Simon Hoffmann -->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Profil ändern</title>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <h1>Account ändern</h1>
+            {% if userform.errors %}
+                <div class="alert alert-danger" role="alert">{{ userform.errors }}</div>
+            {% endif %}
+            {% if profileform.errors %}
+                <div class="alert alert-danger" role="alert">{{ profileform.errors }}</div>
+            {% endif %}
+            {% if addressform.errors %}
+                <div class="alert alert-danger" role="alert">{{ addressform.errors }}</div>
+            {% endif %}
+
+            <form method="post" role="form" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% for field in userform %}
+                    {% if field.name  != 'password' %}
+                        <p>
+                            {{ field.label_tag }}<br>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small style="color: grey">{{ field.help_text }}</small>
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                {% endfor %}
+
+                {% for field in profileform %}
+                    <p>
+                        {{ field.label_tag }}<br>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                    </p>
+                {% endfor %}
+
+                {% for field in addressform %}
+                    <p>
+                        {{ field.label_tag }}<br>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small style="color: grey">{{ field.help_text }}</small>
+                        {% endif %}
+                    </p>
+                {% endfor %}
+
+                <button class="btn btn-primary" type="submit">Änderung speichern</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
