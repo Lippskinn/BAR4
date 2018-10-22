@@ -1,0 +1,51 @@
+{% extends 'ressApp/base.html' %}
+
+<!-- authors: Julian Sears, David Hartmann -->
+
+{% block title %}
+    <title>Bamberger Ressourcenpool - Einloggen</title>
+{% endblock %}
+
+{% block content %}
+
+    <div class="text-center">
+        <h1>Login</h1>
+    <br>
+
+    {% if form.errors %}
+        <p>Der Username oder das Passwort war falsch. Bitte versuchen Sie es erneut.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+            <p>Leider verfügen Sie nicht über die nötigen Rechte, um diese Seite sehen zu können.</p>
+        {% else %}
+            <p>Sie müssen eingeloggt sein, um diese Seite sehen zu können.</p>
+        {% endif %}
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <td>{{ form.username.label_tag }}</td><br>
+            <td>{{ form.username }}</td><br>
+        </div>
+        <div>
+            <td>Passwort:</td><br>
+            <td>{{ form.password }}</td>
+        </div>
+        <br>
+
+        <div>
+            <button type="submit" value="login" class="btn btn-primary">Anmelden</button>
+
+            <input type="hidden" name="next" value="{{ next }}" />
+        </div>
+    </form>
+    <br>
+    {# Assumes you setup the password_reset view in your URLconf #}
+    <p><a href="{% url 'password_reset' %}">Passwort vergessen?</a>  <br> <a href="/ressApp/signup">Noch nicht registriert?</a></p>
+    </div>
+
+{% endblock %}

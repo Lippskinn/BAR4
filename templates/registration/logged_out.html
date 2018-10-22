@@ -1,0 +1,13 @@
+{% extends 'ressApp/base.html' %}
+
+<!-- authors: David Hartmann-->
+{% block title %}
+    <title>Bamberger Ressourcenpool - Ausgeloggt</title>
+{% endblock %}
+
+
+{% block content %}
+<p>Logged out!</p>
+
+<a href="{% url 'login'%}">Klicken Sie hier, um sich wieder einzuloggen</a>
+{% endblock %}
